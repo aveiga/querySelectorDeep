@@ -2,13 +2,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 chrome = webdriver.Chrome()
-chrome.implicitly_wait(10)
-chrome.get("https://www.webcomponents.org/")
-
-# node = chrome.find_element(By.XPATH, '//body')
-# children = node.find_elements_by_xpath('./*')
-# for child in children:
-#     print("<%s> %r" % (child.tag_name, child.text[:60]))
+# chrome.implicitly_wait(10)
+chrome.get(
+    "https://material-components.github.io/material-components-web-components/demos/index.html")
 
 
 def printNodeNames(nodesList):
@@ -23,8 +19,11 @@ def isBlackListed(node):
     try:
         if node.tag_name == "script":
             return True
+
+        if node.tag_name == "style":
+            return True
     except:
-        return False
+        return True
     return False
 
 
@@ -42,7 +41,7 @@ def querySelectorDeep(initialNode, match):
             print("Looking at: " + node.tag_name)
 
             if node.tag_name == match:
-                print("FOUND MATCH 🎉: " + node.tag_name)
+                print("FOUND MATCH: " + node.tag_name)
                 return node
 
             lightChildren = node.find_elements_by_xpath('./*')
@@ -54,14 +53,15 @@ def querySelectorDeep(initialNode, match):
                 toCheck.extend(lightChildren)
 
             if shadowRoot != None:
-                shadowChildren = shadowRoot.findelements_by_xpath('./*')
+                shadowChildren = chrome.execute_script(
+                    'return arguments[0].children', shadowRoot)
                 print(len(shadowChildren))
                 toCheck.extend(shadowChildren)
         except:
             print("Got an error while traversing the DOM Tree for node: " + node.tag_name)
 
         printNodeNames(toCheck)
-    print("not found... 😢")
+    print("not found...")
     return 0
 
 
